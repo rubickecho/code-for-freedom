@@ -16,24 +16,23 @@ Promise.all = function(args) {
 
         function res(i, val) {
             try {
-                console.log(val && (typeof val === 'object' || typeof val === 'function'));
                 if (val && (typeof val === 'object' || typeof val === 'function')) {
                     var then = val.then;
                     if (typeof then === 'function') {
-                        then.call(val, function(val) {
-                            res(i, val);
+                        // Promise(resolve(), reject())
+                        then.call(val, function(re) {
+                            res(i, re);
                         }, reject);
                         return;
                     }
-                    result[i] = val;
-                    count++;
-                    // if (++count === len) {
-                    if (count === len) {
-                        return resolve(result);
-                    }
+                }
+                result[i] = val;
+                count++;
+                // if (++count === len) {
+                if (count === len) {
+                    return resolve(result);
                 }
             } catch(err) {
-                console.log('error:', error)
                 return reject(err)
             }
         }
@@ -45,17 +44,17 @@ Promise.all = function(args) {
 }
 
 const test1 = Promise.all([new Promise((resolve, reject) => {
-    // setTimeout(() => {
+    setTimeout(() => {
         resolve('1')
-    // }, 1000)
+    }, 1000)
 }), new Promise((resolve, reject) => {
-    // setTimeout(() => {
+    setTimeout(() => {
         resolve('2')
-    // }, 2000)
+    }, 2000)
 }), new Promise((resolve, reject) => {
-    // setTimeout(() => {
+    setTimeout(() => {
         resolve('3')
-    // }, 3000)
+    }, 3000)
 })]);
 test1.then(function(res) {
     console.log('test1 res', res)
