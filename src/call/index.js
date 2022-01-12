@@ -1,7 +1,7 @@
 Function.prototype.mockCall = function(o) {
     // this 即调用的这个函数
     
-    var context = o || window;
+    var context = o || window; // 默认为null时，指向window
     var args = [];
 
     // 以上个例子为例，此时的arguments为：
@@ -22,10 +22,12 @@ Function.prototype.mockCall = function(o) {
 
     // 执行方法
     // context.fn(...args); // es6
-    eval(`context.fn(${args.join(',')})`); // es5
+    const result = eval(`context.fn(${args.join(',')})`); // es5
 
     // 删除该属性
     delete context.fn;
+
+    return result;
 }
 
 var obj = {
@@ -36,8 +38,16 @@ const objFn = function(age, colors) {
     console.log(this.name);
     console.log(age);
     console.log(colors);
+
+    return {
+        name: this.name,
+        age: age,
+        colors: colors
+    }
 }
 
 // this 指向了obj
-// objFn.call(obj, 24, ['white', 'yellow']) // tom
-objFn.mockCall(obj, 24, ['white', 'yellow']) // tom
+// objFn.call(obj, 24, ['white', 'yellow'])
+const result = objFn.mockCall(obj, 24, ['white', 'yellow'])
+
+console.log('result:', result);
