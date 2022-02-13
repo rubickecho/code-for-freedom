@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脏检查机制</title>
+</head>
+<body>
+    <div>
+        <input type="text" q-value="name" q-event="value" id="name">
+        名称:<span q-value="name" q-event="text" id="name_span"></span>
+    </div>
+    <div>
+        <input type="text" q-value="age" q-event="value" id="age">
+        年龄:<span q-value="age" q-event="text" id="age_span"></span>
+    </div>
+</body>
+<script>
+    // 获取节点
+    let elems = [ document.getElementById('name'), document.getElementById('age'), document.getElementById('name_span'), document.getElementById('age_span') ];
+
+    // 定义数据模型
+    let data = {
+        name: 'Jack',
+        age: 18
+    }
+
+    // 定义指令
+    const directive = {
+        value: function(key, str) {
+            this.setAttribute(key, str);
+        },
+        text: function(key, str) {
+            this.innerHTML = str;
+        }
+    }
+
+    // 添加 dom 节点监听器
+    const addEventListener = function(el, binding, vnode) {
+        elems[0].addEventListener('keyup', function(e) {
+            data.name = e.target.value;
+            $digest(e.target.getAttribute('q-value'));
+            console.log('data.name:', data.name);
+        }, false)
+
+        elems[1].addEventListener('keyup', function(e) {
+            data.age = e.target.value;
+            $digest(e.target.getAttribute('q-value'));
+            console.log('data.age:', data.age);
+        }, false)
+    }
+
+    // 渲染 dom 节点
+    const renderDom = function(elems) {
+
+        elems.forEach(elem => {
+            elem.directive = [];
+        })
+    }
+
+    const $digest = function(value) {
+        console.log(`[q-value='${value}']`)
+
+        // 匹配触发更新的节点
+        let domList = document.querySelectorAll(`[q-value='${value}']`);
+
+        // 更新节点
+        digest(domList);
+    }
+
+    const digest = function(domList) {
+        domList.forEach(element => {
+            const attrs = element.attributes;
+            console.log('attrs:', attrs)
+
+            for(let attr of attrs) {
+                if (attr.nodeName.indexOf('q-event') >= 0) {
+                    let dataKey = element.getAttribute('q-value') || undefined;
+                    if (element.directive[attr.nodeValue] !== data[dataKey]) {
+                        directive[attr.nodeValue].call(element, attr.nodeValue, data[dataKey]);
+                        element.directive[attr.nodeValue] = data[dataKey];
+                    }
+                }
+            }
+        });
+    }
+
+    renderDom(elems);
+    $digest('name');
+    $digest('age');
+
+    addEventListener();
+
+</script>
+</html>

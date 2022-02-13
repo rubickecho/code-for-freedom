@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手动触发绑定</title>
+</head>
+<body>
+    <input type="text" id="name" q-value="value">
+    <span id="show-name" q-text="value"></span>
+</body>
+<script>
+
+    let elems = [document.getElementById('name'), document.getElementById('show-name')];
+
+    // 定义对象
+    let data = {
+        value: 'Hello JavaScript'
+    }
+
+    // 监听dom变化
+    if (document.addEventListener) {
+        document.addEventListener('keyup', function(e) {
+            console.log('e:', e)
+            if (e.target.id === 'name') {
+                // 通知更新
+                viewModelSet('value', e.target.value);
+            }
+        }, false)
+
+        document.addEventListener('onkeyup', function(e) {
+            if (e.target.id === 'name') {
+                // 通知更新
+                viewModelSet('value', e.target.value);
+            }
+        }, false)
+    }
+
+    function viewModelSet(key, value) {
+        data[key] = value;
+        // 扫描DOM节点，更新DOM
+        renderDom();
+    }
+
+    let directive = {
+        text: function(text) {
+            this.innerHTML = text;
+        },
+        value: function(value) {
+            this.setAttribute('value', value);
+        }
+    }
+
+    function renderDom() {
+        for (let elem of elems) {
+            elem.directive = [];
+            for (let attr of elem.attributes) {
+                if (attr.nodeName.indexOf('q-') >= 0) {
+                    directive[attr.nodeName.slice(2)].call(elem, data[attr.nodeValue]);
+                    elem.directive.push(attr.nodeName.slice(2));
+                } 
+            }
+        }
+    }
+
+    function onLoad() {
+        renderDom();
+        
+        setTimeout(() => {
+            data.value = 'Hello Python';
+            renderDom();
+        }, 3000)
+    }
+    onLoad();
+
+</script>
+</html>
