@@ -5,14 +5,20 @@
  * 移除
  * 通知
  */
-class Dep {
+export default class Dep {
 
     constructor() {
         this.subs = [];
     }
 
-    add(sub) {
-        this.deps.push(sub)
+    addSub(sub) {
+        this.subs.push(sub);
+    }
+
+    depend(sub) {
+        if (Dep.target) {
+            Dep.target.addDep(this); // 调用 watcher，将当前 watcher 依赖收集
+        }
     }
 
     remove(sub) {
